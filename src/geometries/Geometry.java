@@ -13,5 +13,6 @@ public abstract class Geometry {
      * @param point the point on the geometry.
      * @return the normal vector to the geometry.
      */
+
     public abstract Vector getNormal(Point point);
 }
