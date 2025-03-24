@@ -21,7 +21,7 @@ public class Plane extends Geometry {
         this.point = p1;
         Vector v1 = p2.subtract(p1);
         Vector v2 = p3.subtract(p1);
-        this.normal = null; // הנורמל לא מחושב בשלב הזה
+        this.normal = null;
     }
 
     /**
