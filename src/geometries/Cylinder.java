@@ -3,6 +3,8 @@ package geometries;
 import primitives.Point;
 import primitives.Ray;
 import primitives.Vector;
+import primitives.Util;
+
 
 /**
  * Class representing a cylinder in 3D space.
@@ -20,8 +22,6 @@ public class Cylinder extends Tube {
      */
     public Cylinder(Ray axisRay, double radius, double height) {
         super(axisRay, radius);
-        if (height <= 0)
-            throw new IllegalArgumentException("Height must be positive");
         this.height = height;
     }
 
