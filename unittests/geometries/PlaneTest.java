@@ -62,6 +62,7 @@ class PlaneTest {
                 "Constructor did not throw an exception for collinear points");
     }
 
+
     @Test
     void getNormal() {
         // ============ Equivalence Partitions Tests ==============
