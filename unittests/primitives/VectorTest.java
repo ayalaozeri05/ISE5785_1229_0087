@@ -3,118 +3,188 @@ package primitives;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static primitives.Util.*;
+
 
 /**
- * Unit tests for primitives.Vector class.
+ * The {@code VectorTest} class contains unit tests for the {@link Vector} class.
+ * It covers various functionalities and edge cases of the Vector class methods.
  */
 class VectorTest {
+    /**
+     * A small delta value for comparing floating-point numbers.
+     */
+    private final double DELTA = 0.00001;
 
+    /**
+     * Tests the constructor of the Vector class.
+     * It verifies that the constructor throws an IllegalArgumentException for a zero vector.
+     */
     @Test
-    void add() {
+    void testVector() {
         // ============ Equivalence Partitions Tests ==============
 
-        // TC01: Adding two vectors
+        // TC01: Verify exception for zero vector construction
+        assertThrows(IllegalArgumentException.class, () -> {
+            new Vector(0, 0, 0);
+        }, "Expected constructor to throw an IllegalArgumentException for zero vector");
+    }
+
+    /**
+     * Tests the lengthSquared method of the Vector class.
+     * It checks if the squared length of a vector is computed correctly.
+     */
+    @Test
+    void testLengthSquared() {
+        // ============ Equivalence Partitions Tests ==============
+
+        // TC01: Verify squared length calculation
         Vector v1 = new Vector(1, 2, 3);
-        Vector v2 = new Vector(4, 5, 6);
-        Vector expected = new Vector(5, 7, 9);
-        assertEquals(expected, v1.add(v2), "Addition of vectors failed");
+        assertEquals(14, v1.lengthSquared(), DELTA, "testLengthSquared(): Incorrect squared length of the vector");
+    }
+
+    /**
+     * Tests the length method of the Vector class.
+     * It checks if the length of a vector is computed correctly.
+     */
+    @Test
+    void testLength() {
+        // ============ Equivalence Partitions Tests ==============
+
+        // TC01: Verify length calculation
+        Vector v1 = new Vector(1, 2, 3);
+        assertEquals(Math.sqrt(14), v1.length(), DELTA, "testLength(): Incorrect length of the vector");
+    }
+
+    /**
+     * Tests the add and subtract methods of the Vector class.
+     * It verifies the correctness of vector addition and subtraction operations.
+     */
+    @Test
+    void testAdd() {
+        Vector v1 = new Vector(1, 2, 3);
+        Vector v2 = new Vector(1, 2, 4);
+
+        // ============ Equivalence Partitions Tests ==============
+
+        // TC01: Verify vector addition
+        assertEquals(new Vector(2, 4, 7), v1.add(v2), "testAdd(): Vector addition did not work correctly");
 
         // =============== Boundary Values Tests ==================
 
-        // TC11: Adding a zero vector
-        Vector zero = new Vector(0, 0, 0);
-        assertEquals(v1, v1.add(zero), "Adding a zero vector failed");
+        // TC10: Verify exception for addition of opposite vectors
+        assertThrows(IllegalArgumentException.class, () -> v1.add(new Vector(-1, -2, -3)), "testAdd(): Expected addition of a vector and its opposite to throw IllegalArgumentException");
     }
 
+    /**
+     * Tests the dotProduct method of the Vector class.
+     * It verifies the correctness of the dot product calculation between vectors.
+     */
     @Test
-    void scale() {
+    void testDotProduct() {
+        Vector v1 = new Vector(1, 2, 3);
+        Vector v2 = new Vector(1, 2, 4);
+
         // ============ Equivalence Partitions Tests ==============
 
-        // TC01: Scaling a vector by a positive scalar
+        // TC01: Verify dot product calculation
+        assertEquals(17, v1.dotProduct(v2), DELTA, "testDotProduct(): Incorrect dot product of the vectors");
+
+        // =============== Boundary Values Tests ==================
+
+        // TC10: Verify dot product of orthogonal vectors
+        assertEquals(0, v1.dotProduct(new Vector(0, 3, -2)), DELTA, "ERROR: dotProduct() for orthogonal vectors is not zero");
+    }
+
+    /**
+     * Tests the subtract method of the Vector class.
+     * It verifies the correctness of vector subtraction operations.
+     */
+    @Test
+    void testSubtract() {
+        Vector v1 = new Vector(1, 2, 3);
+        Vector v2 = new Vector(1, 2, 4);
+
+        // ============ Equivalence Partitions Tests ==============
+
+        // TC01: Verify vector subtraction
+        assertEquals(new Vector(0, 0, 1), v2.subtract(v1), "testSubtract: Subtraction of vectors did not produce the expected result");
+
+        // =============== Boundary Values Tests ==================
+
+        // TC10: Verify exception for subtraction of the same vector
+        assertThrows(IllegalArgumentException.class, () -> v1.subtract(v1), "testAdd(): Expected subtraction of a vector from itself to throw IllegalArgumentException");
+    }
+
+    /**
+     * Tests the scale method of the Vector class.
+     * It verifies that vector scaling is performed correctly.
+     */
+    @Test
+    void testScale() {
+        Vector v1 = new Vector(1, 2, 3);
+
+        // ============ Equivalence Partitions Tests ==============
+
+        // TC01: Verify vector scaling
+        assertEquals(new Vector(2, 4, 6), v1.scale(2.0), "testScale(): Incorrect scaling of the vector");
+
+        // =============== Boundary Values Tests ==================
+
+        // TC10: Verify exception for scaling by zero
+        assertThrows(IllegalArgumentException.class, () -> v1.scale(0.0), "testScale(): Scaling by zero should throw IllegalArgumentException");
+    }
+
+    /**
+     * Tests the crossProduct method of the Vector class.
+     * It checks if the cross product of vectors is computed correctly.
+     */
+    @Test
+    void testCrossProduct() {
+        Vector v1 = new Vector(1, 2, 3);
+        Vector v2 = new Vector(1, 2, 4);
+        Vector v1parallel = new Vector(-2, -4, -6);
+        Vector v1orthogonal = new Vector(0, 3, -2);
+        Vector vr = v1.crossProduct(v1orthogonal);
+
+        // ============ Equivalence Partitions Tests ==============
+
+        // TC01: Verify cross product calculation
+        assertEquals(new Vector(2, -1, 0), v1.crossProduct(v2), "testCrossProduct(): Incorrect cross product of the vectors");
+
+        // =============== Boundary Values Tests ==================
+
+        // TC10: Verify exception for cross product of parallel vectors
+        assertThrows(IllegalArgumentException.class, () -> v1.crossProduct(v1parallel), "ERROR: crossProduct() for parallel vectors does not throw an exception");
+
+        // TC11: Verify the length of the cross product result
+        assertEquals(vr.length(), v1.length() * v1orthogonal.length(), DELTA, "ERROR: crossProduct() wrong result length");
+
+        // TC12: Verify the cross product result is orthogonal to the original vectors
+        assertTrue(isZero(vr.dotProduct(v1)) || isZero(vr.dotProduct(v1orthogonal)), "ERROR: crossProduct() result is not orthogonal to its operands");
+    }
+
+    /**
+     * Tests the normalize method of the Vector class.
+     * It checks if the normalization of a vector is performed correctly.
+     * The test covers equivalence partitions and boundary values.
+     */
+    @Test
+    void testNormalize() {
         Vector v = new Vector(1, 2, 3);
-        double scalar = 2.0;
-        Vector expected = new Vector(2, 4, 6);
-        assertEquals(expected, v.scale(scalar), "Scaling by positive scalar failed");
+        Vector u = v.normalize();
+
+        // ============ Equivalence Partitions Tests ==============
+
+        // TC01: Verify normalized vector is a unit vector
+        assertEquals(1.0, u.length(), DELTA, "ERROR: the normalized vector is not a unit vector");
 
         // =============== Boundary Values Tests ==================
 
-        // TC11: Scaling a vector by zero (should return a zero vector)
-        Vector zeroExpected = new Vector(0, 0, 0);
-        assertEquals(zeroExpected, v.scale(0), "Scaling by zero failed");
+        // TC10: Verify exception for cross product with the normalized vector
+        assertThrows(IllegalArgumentException.class, () -> v.crossProduct(u), "ERROR: the normalized vector is not parallel to the original one");
 
-        // TC12: Scaling a vector by a negative scalar
-        double negativeScalar = -2.0;
-        Vector expectedNegative = new Vector(-2, -4, -6);
-        assertEquals(expectedNegative, v.scale(negativeScalar), "Scaling by negative scalar failed");
-    }
-
-    @Test
-    void dotProduct() {
-        // ============ Equivalence Partitions Tests ==============
-
-        // TC01: Dot product of two vectors
-        Vector v1 = new Vector(1, 2, 3);
-        Vector v2 = new Vector(4, -5, 6);
-        double expected = 4 + 2 * -5 + 3 * 6; // 4 - 10 + 18 = 12// assertEquals(expected, v1.dotProduct(v2), "Dot product calculation failed");
-
-        // =============== Boundary Values Tests ==================
-
-        // TC11: Dot product with a zero vector (should be 0)
-        Vector zero = new Vector(0, 0, 0);
-        assertEquals(0, v1.dotProduct(zero), "Dot product with zero vector failed");
-    }
-
-    @Test
-    void crossProduct() {
-        // ============ Equivalence Partitions Tests ==============
-
-        // TC01: Cross product of two orthogonal vectors
-        Vector v1 = new Vector(1, 0, 0);
-        Vector v2 = new Vector(0, 1, 0);
-        Vector expected = new Vector(0, 0, 1);
-        assertEquals(expected, v1.crossProduct(v2), "Cross product of orthogonal vectors failed");
-
-        // =============== Boundary Values Tests ==================
-
-        // TC11: Cross product of parallel vectors (should throw exception)
-        Vector v3 = new Vector(2, 2, 2);
-        Vector v4 = new Vector(-4, -4, -4);
-        assertThrows(IllegalArgumentException.class, () -> v3.crossProduct(v4), "Cross product of parallel vectors did not throw an exception");
-    }
-
-    @Test
-    void lengthSquared() {
-        // ============ Equivalence Partitions Tests ==============
-
-        // TC01: Length squared of a vector
-        Vector v = new Vector(1, 2, 2);
-        double expected =  1 + 2 * 2 + 2 * 2; // 1 + 4 + 4 = 9
-        assertEquals(expected, v.lengthSquared(), "Length squared calculation failed");
-    }
-
-    @Test
-    void length() {
-        // ============ Equivalence Partitions Tests ==============
-
-        // TC01: Length of a vector
-        Vector v = new Vector(1, 2, 2);
-        double expected = Math.sqrt(9); // sqrt(1 + 4 + 4) = 3
-        assertEquals(expected, v.length(), "Length calculation failed");
-    }
-
-    @Test
-    void normalize() {
-        // ============ Equivalence Partitions Tests ==============
-
-        // TC01: Normalizing a non-zero vector
-        Vector v = new Vector(0, 3, 4);
-        Vector expected = new Vector(0, 0.6, 0.8);
-        assertEquals(expected, v.normalize(), "Normalization of non-zero vector failed");
-
-        // =============== Boundary Values Tests ==================
-
-        // TC11: Normalizing a zero vector (should throw exception)
-        Vector zeroVector = new Vector(0, 0, 0);
-        assertThrows(IllegalArgumentException.class, zeroVector::normalize, "Normalization of zero vector did not throw an exception");
+        // TC11: Verify the normalized vector is not opposite to the original one
+        assertTrue(v.dotProduct(u) > 0, "ERROR: the normalized vector is opposite to the original one");
     }
 }

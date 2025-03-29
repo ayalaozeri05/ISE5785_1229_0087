@@ -21,8 +21,7 @@ public class Plane extends Geometry {
         this.point = p1;
         Vector v1 = p2.subtract(p1);
         Vector v2 = p3.subtract(p1);
-        this.normal = null;
-    }
+        this.normal = v1.crossProduct(v2).normalize();    }
 
     /**
      * Constructor for a plane defined by a point and a normal vector.
@@ -37,6 +36,7 @@ public class Plane extends Geometry {
 
     @Override
     public Vector getNormal(Point point) {
-        return normal;
+       return normal;
+
     }
 }

@@ -1,80 +1,70 @@
 package geometries;
 
+import primitives.*;
 import org.junit.jupiter.api.Test;
-import primitives.Point;
-import primitives.Vector;
+
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Unit tests for geometries.Plane class.
+ * Unit tests for the Plane class.
  */
-class PlaneTest  {
+class PlaneTest {
+    /**
+     * A small delta value for comparing floating-point numbers.
+     */
+    private final double DELTA = 0.000001;
 
+    /**
+     * Test case for constructing a plane using three points.
+     */
     @Test
-    void constructorThreePoints() {
-        // ============ Equivalence Partitions Tests ==============
+    public void testConstructor() {
+        // ============ Boundary Values Tests ==================
 
-        // TC01: Normal vector is orthogonal to two different vectors between points and has length 1
-        Point p1 = new Point(0, 0, 0);
-        Point p2 = new Point(1, 0, 0);
-        Point p3 = new Point(0, 1, 0);
-        Plane plane = new Plane(p1, p2, p3);
+        // TC10: Two identical points (first and second)
+        assertThrows(IllegalArgumentException.class, () -> new Plane(new Point(1, 1, 1),
+                        new Point(1, 1, 1), new Point(0, 0, 0)),
+                "Plane constructor does not throw an exception for identical points (first and second)");
 
-        Vector v1 = p2.subtract(p1); // Vector between p1 and p2
-        Vector v2 = p3.subtract(p1); // Vector between p1 and p3
-        Vector normal = plane.getNormal();
+        // TC11: Two identical points (first and third)
+        assertThrows(IllegalArgumentException.class, () -> new Plane(new Point(1, 1, 1),
+                        new Point(0, 0, 0), new Point(1, 1, 1)),
+                "Plane constructor does not throw an exception for identical points (first and third)");
 
-        // Check that the normal vector is orthogonal to v1 and v2
-        assertEquals(0, normal.dotProduct(v1), "Normal is not orthogonal to the first vector");
-        assertEquals(0, normal.dotProduct(v2), "Normal is not orthogonal to the second vector");
+        // TC12: Two identical points (second and third)
+        assertThrows(IllegalArgumentException.class, () -> new Plane(new Point(1, 1, 1),
+                        new Point(0, 0, 0), new Point(0, 0, 0)),
+                "Plane constructor does not throw an exception for identical points (second and third)");
 
-        // Check that the normal vector has length 1
-        assertEquals(1, normal.length(), "Normal vector is not of length 1");
+        // TC13: All three points are identical
+        assertThrows(IllegalArgumentException.class, () -> new Plane(new Point(1, 1, 1),
+                        new Point(1, 1, 1), new Point(1, 1, 1)),
+                "Plane constructor does not throw an exception when all points are identical");
 
-        // =============== Boundary Values Tests ==================
-
-        // TC11: First and second points are identical
-        Point identicalP1P2 = new Point(0, 0, 0);
-        assertThrows(IllegalArgumentException.class, () -> new Plane(identicalP1P2, identicalP1P2, p3),
-                "Constructor did not throw an exception for identical first and second points");
-
-        // TC12: First and third points are identical
-        Point identicalP1P3 = new Point(0, 0, 0);
-        assertThrows(IllegalArgumentException.class, () -> new Plane(identicalP1P3, p2, identicalP1P3),
-                "Constructor did not throw an exception for identical first and third points");
-
-        // TC13: Second and third points are identical
-        Point identicalP2P3 = new Point(1, 0, 0);
-        assertThrows(IllegalArgumentException.class, () -> new Plane(p1, identicalP2P3, identicalP2P3),
-                "Constructor did not throw an exception for identical second and third points");
-
-        // TC14: All three points are identical
-        Point identicalAll = new Point(1, 1, 1);
-        assertThrows(IllegalArgumentException.class, () -> new Plane(identicalAll, identicalAll, identicalAll),
-                "Constructor did not throw an exception for all identical points");
-
-        // TC15: All three points are collinear (but not identical)
-        Point collinearP1 = new Point(0, 0, 0);
-        Point collinearP2 = new Point(1, 1, 1);
-        Point collinearP3 = new Point(2, 2, 2);
-        assertThrows(IllegalArgumentException.class, () -> new Plane(collinearP1, collinearP2, collinearP3),
-                "Constructor did not throw an exception for collinear points");
+        // TC14: Three collinear points (but not identical)
+        assertThrows(IllegalArgumentException.class, () -> new Plane(new Point(1, 1, 1),
+                        new Point(2, 2, 2), new Point(3, 3, 3)),
+                "Plane constructor does not throw an exception for collinear points");
     }
 
 
+    /**
+     * Test case for getNormal() method of Plane class.
+     */
     @Test
-    void getNormal() {
+    public void testGetNormal() {
         // ============ Equivalence Partitions Tests ==============
-
-        // TC01: Verify the normal of the plane is correct
-        Point p1 = new Point(0, 0, 0);
-        Point p2 = new Point(1, 0, 0);
-        Point p3 = new Point(0, 1, 0);
-        Plane plane = new Plane(p1, p2, p3);
-
-        Vector normal = plane.getNormal() ;
-        Vector expectedNormal = new Vector(0, 0, 1); // Expected normal for these points
-        assertEquals(expectedNormal, normal.normalize(), "Normal vector calculation failed");
+        // TC01: Test the normal vector calculation of a plane defined by three points
+        Plane p = new Plane(new Point(0, 0, 1), new Point(0, 1, 0), new Point(1, 0, 0));
+        Vector result = p.getNormal(new Point(0, 0, 1));
+        // Test that the length of the normal is 1
+        assertEquals(1, result.length(), DELTA, "ERROR: the length of the normal is not 1");
+        // Check that the normal vector is orthogonal to the plane
+        assertEquals(0.0, result.dotProduct(new Vector(0, -1, 1)), DELTA, "ERROR: the normal vector is not orthogonal to the vector (0, -1, 1)");
+        assertEquals(0.0, result.dotProduct(new Vector(-1, 1, 0)), DELTA, "ERROR: the normal vector is not orthogonal to the vector (-1, 1, 0)");
     }
-}
+
+
+    }

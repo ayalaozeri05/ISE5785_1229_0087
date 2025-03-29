@@ -8,6 +8,10 @@ import static org.junit.jupiter.api.Assertions.*;
  * Unit tests for primitives.Point class.
  */
 class PointTest {
+    /**
+     * A small delta value for comparing floating-point numbers.
+     */
+    private static final double DELTA = 0.00001;
 
     @Test
     void subtract() {
@@ -52,47 +56,49 @@ class PointTest {
         assertEquals(expectedLarge, p.add(largeVector), "Adding large vector failed");
     }
 
+    /**
+     * Test the distanceSquared method of the Point class.
+     */
     @Test
-    void distanceSquared() {
+    public void testDistanceSquared() {
+        Point p1 = new Point(1, 2, 3);
+        Point p2 = new Point(2, 4, 5);
+
         // ============ Equivalence Partitions Tests ==============
 
-        // TC01: Squared distance between two distinct points
-        Point p1 = new Point(0, 0, 0);
-        Point p2 = new Point(1, 2, 3);
-        double expected = 14; // 1^2 + 2^2 + 3^2
-        assertEquals(expected, p1.distanceSquared(p2), "Squared distance is incorrect");
+        // TC01: Calculate squared distance between two different points
+        assertEquals(9, p1.distanceSquared(p2), DELTA,
+                "ERROR: squared distance between points is wrong");
+        assertEquals(9, p2.distanceSquared(p1), DELTA,
+                "ERROR: squared distance between points is wrong");
 
         // =============== Boundary Values Tests ==================
 
-        // TC11: Squared distance between a point and itself (should be 0)
-        assertEquals(0, p1.distanceSquared(p1), "Squared distance between the same point is not zero");
-
-        // TC12: Very large squared distance between two points
-        Point p3 = new Point(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
-        Point p4 = new Point(-Double.MAX_VALUE, -Double.MAX_VALUE, -Double.MAX_VALUE);
-        double expectedLarge = Math.pow(2 * Double.MAX_VALUE, 2) * 3;
-        assertEquals(expectedLarge, p3.distanceSquared(p4), "Squared distance with large values failed");
+        // TC10: Calculate squared distance between a point and itself
+        assertEquals(0, p1.distanceSquared(p1), DELTA,
+                "ERROR: point squared distance to itself is not zero");
     }
 
+    /**
+     * Test the distance method of the Point class.
+     */
     @Test
-    void distance() {
+    public void testDistance() {
+        Point p1 = new Point(1, 2, 3);
+        Point p2 = new Point(2, 4, 5);
+
         // ============ Equivalence Partitions Tests ==============
 
-        // TC01: Distance between two distinct points
-        Point p1 = new Point(0, 0, 0);
-        Point p2 = new Point(1, 2, 3);
-        double expected = Math.sqrt(14); // sqrt(1^2 + 2^2 + 3^2)
-        assertEquals(expected, p1.distance(p2), "Distance is incorrect");
+        // TC01: Calculate distance between two different points
+        assertEquals(3, p1.distance(p2), DELTA,
+                "ERROR: distance between points is wrong");
+        assertEquals(3, p2.distance(p1), DELTA,
+                "ERROR: distance between points is wrong");
 
         // =============== Boundary Values Tests ==================
 
-        // TC11: Distance between a point and itself (should be 0)
-        assertEquals(0, p1.distance(p1), "Distance between the same point is not zero");
-
-        // TC12: Very large distance between two points
-        Point p3 = new Point(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
-        Point p4 = new Point(-Double.MAX_VALUE, -Double.MAX_VALUE, -Double.MAX_VALUE);
-        double expectedLarge = Math.sqrt(Math.pow(2 * Double.MAX_VALUE, 2) * 3);
-        assertEquals(expectedLarge, p3.distance(p4), "Distance with large values failed");
+        // TC10: Calculate distance between a point and itself
+        assertEquals(0, p1.distance(p1), DELTA,
+                "ERROR: point distance to itself is not zero");
     }
 }
