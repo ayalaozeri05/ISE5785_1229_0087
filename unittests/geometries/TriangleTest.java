@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 import primitives.*;
 import primitives.Ray;
 import primitives.Vector;
-//import geometries.Intersectable.GeoPoint;
+import geometries.Intersectable.GeoPoint;
 
 import java.util.List;
 
