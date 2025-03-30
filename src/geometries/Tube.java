@@ -24,7 +24,7 @@ public class Tube extends RadialGeometry {
     @Override
     public Vector getNormal(Point point)
     {
-
+double t =axisRay.
 
     }
 }

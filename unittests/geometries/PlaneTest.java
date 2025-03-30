@@ -11,6 +11,9 @@ import static org.junit.jupiter.api.Assertions.*;
  * Unit tests for the Plane class.
  */
 class PlaneTest {
+    private final Point p1 = new Point(0, 1, 1);
+    private final Point p3 = new Point(0, 0, 1);
+
     /**
      * A small delta value for comparing floating-point numbers.
      */
@@ -21,6 +24,11 @@ class PlaneTest {
      */
     @Test
     public void testConstructor() {
+        // ============ Equivalence Partitions Tests ==============
+        // TC01: Test for a proper result
+        assertDoesNotThrow(() -> new Plane(p1, new Point(0, 1, 0), p3), "Failed to create a proper plane");
+
+
         // ============ Boundary Values Tests ==================
 
         // TC10: Two identical points (first and second)
