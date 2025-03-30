@@ -1,8 +1,6 @@
 package geometries;
-
 import primitives.Point;
 import primitives.Vector;
-
 /**
  * Class representing a plane in 3D space.
  */
