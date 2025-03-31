@@ -15,6 +15,21 @@ public class Ray {
     private final Vector direction;
 
     /**
+     * getter of the direction
+     * @return the direction
+     */
+    public Vector getDirection() {
+        return direction;
+    }
+    /**
+     * getter of the head
+     * @return the head
+     */
+    public Point getOrigin() {
+        return origin;
+    }
+
+    /**
      * Constructor to initialize a ray with a given origin point and direction vector.
      *
      * @param origin    the origin point of the ray.

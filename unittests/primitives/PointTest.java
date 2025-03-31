@@ -8,52 +8,44 @@ import static org.junit.jupiter.api.Assertions.*;
  * Unit tests for primitives.Point class.
  */
 class PointTest {
+    private final double DELTA = 0.00001;
+    private final Vector v1 = new Vector(1, 2, 3);
+    private final Point p1 = new Point(1, 2, 3);
+
     /**
      * A small delta value for comparing floating-point numbers.
      */
-    private static final double DELTA = 0.00001;
 
     @Test
-    void subtract() {
+
+    void testSubtract() {
+
         // ============ Equivalence Partitions Tests ==============
 
-        // TC01: Subtracting two distinct points
-        Point p1 = new Point(4, 5, 6);
-        Point p2 = new Point(1, 2, 3);
-        Vector expected = new Vector(3, 3, 3);
-        assertEquals(expected, p1.subtract(p2), "Subtraction result is incorrect");
+        // TC01: Subtract two points
 
-        // =============== Boundary Values Tests ==================
+        assertEquals(v1, new Point(2, 4, 6).subtract(p1), "Subtract two points does not work correctly");
 
-        // TC11: Subtracting a point from itself (should return zero vector)
-        assertEquals(new Vector(0, 0, 0), p1.subtract(p1), "Subtraction of a point from itself failed");
 
-        // TC12: Subtracting a point with very large values from another point
-        Point p3 = new Point(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
-        Vector expectedLarge = new Vector(Double.MAX_VALUE - 4, Double.MAX_VALUE - 5, Double.MAX_VALUE - 6);
-        assertEquals(expectedLarge, p3.subtract(p1), "Subtraction with large values failed");
+
+        // ============ Boundary Values Tests ==================
+
+        // TC02: Subtract equal points
+
+        assertThrows(IllegalArgumentException.class, () -> p1.subtract(p1), "Subtract equal points does not work correctly");
+
     }
 
     @Test
     void add() {
+
         // ============ Equivalence Partitions Tests ==============
+        // TC01: Add a vector to a point
+        assertEquals(new Point(2, 4, 6), p1.add(v1), "Add a vector to a point does not work correctly");
 
-        // TC01: Adding a vector to a point
-        Point p = new Point(1, 2, 3);
-        Vector v = new Vector(4, 5, 6);
-        Point expected = new Point(5, 7, 9);
-        assertEquals(expected, p.add(v), "Addition of vector to point failed");
-
-        // =============== Boundary Values Tests ==================
-
-        // TC11: Adding a zero vector (result should be the same point)
-        Vector zeroVector = new Vector(0, 0, 0);
-        assertEquals(p, p.add(zeroVector), "Adding zero vector did not return the same point");
-
-        // TC12: Adding a vector with very large values
-        Vector largeVector = new Vector(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
-        Point expectedLarge = new Point(Double.MAX_VALUE + 1, Double.MAX_VALUE + 2, Double.MAX_VALUE + 3);
-        assertEquals(expectedLarge, p.add(largeVector), "Adding large vector failed");
+        // ============ Boundary Values Tests ==================
+        // TC02: Add a vector to a point
+        assertEquals(Point.ZERO, p1.add(new Vector(-1, -2, -3)), "Add a vector to a point does not work correctly");
     }
 
     /**

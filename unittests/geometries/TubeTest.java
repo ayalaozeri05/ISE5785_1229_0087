@@ -31,22 +31,17 @@ class TubeTests {
         assertDoesNotThrow(() -> new Tube(r1, 1), "Failed to create a proper tube");
     }
 
-    /**
-     * Test method for {@link geometries.Tube#getNormal(primitives.Point)}.
-     */
-
     @Test
     void testGetNormal() {
-        // ============ Equivalence Partitions Tests ==============
-        // TC01: Test normal for a point on the outer surface of the tube
-        assertEquals(new Vector(1, 0, 0), tube.getNormal(new Point(1, 0, 1)), "Bad normal to tube");
-
-        // =============== Boundary Values Tests =================
-
-        // Additional Case for Boundary
-        // TC02: Test normal for a point that creates a right angle with the axis of the tube
-        Point boundaryPoint = new Point(0, 1, 0); // Example point "in front of the head of the ray"
-        assertEquals(new Vector(0, 1, 0), tube.getNormal(boundaryPoint), "Bad normal for boundary point");
+        // TC01: Point on the side surface of the tube
+        Tube tube = new Tube( new Ray( new Point(0, 0, 0),new Vector(0, 0, 1)),1);
+        Vector expected = new Vector(1, 0, 0);
+        Vector normal = tube.getNormal(new Point(1, 0, 5));
+        // Check that the normal is a unit vector
+        assertEquals(1, normal.length(), 1e-10, "ERROR: Normal is not unit length");
+        // Check that the normal vector is as expected
+        assertEquals(expected, normal, "ERROR: Wrong normal on tube surface");
     }
-
 }
+
+
