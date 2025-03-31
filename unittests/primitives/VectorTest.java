@@ -133,7 +133,7 @@ class VectorTest {
 
         // TC10: Verify exception for scaling by zero
         assertThrows(IllegalArgumentException.class, () -> v1.scale(0.0), "testScale(): Scaling by zero should throw IllegalArgumentException");
-    }//
+    }//blabla
 
     /**
      * Tests the crossProduct method of the Vector class.
