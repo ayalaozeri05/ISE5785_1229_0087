@@ -1,10 +1,15 @@
 package geometries;
 import primitives.Point;
+import primitives.Ray;
 import primitives.Vector;
+
+import java.util.List;
+import static primitives.Util.isZero;
+
 /**
  * Class representing a plane in 3D space.
  */
-public class Plane extends Geometry {
+public class Plane implements Geometry {
     private final Point point;
     private final Vector normal;
 
@@ -35,6 +40,20 @@ public class Plane extends Geometry {
     @Override
     public Vector getNormal(Point point) {
        return normal;
+    }
+    @Override
+    public List<Point> findIntersections(Ray ray) {
+        //Check if the Q-P0 is the ZERO Vector
+        if (point.equals(ray.getOrigin()))
+            return List.of();       //Check if the ray is parallel to the plane
+        if (isZero(normal.dotProduct(ray.getDirection())))
+            return List.of();       //Calculate the Scalar t that will give us the point of Intersection with the plane
+        double t = normal.dotProduct(point.subtract(ray.getOrigin())) / normal.dotProduct(ray.getDirection());
+        if (t <= 0 || isZero(t))
+            return List.of();
+
+        return List.of(ray.getPoint(t));
 
     }
-}
+
+    }

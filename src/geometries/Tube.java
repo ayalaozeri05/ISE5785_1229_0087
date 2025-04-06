@@ -4,6 +4,8 @@ import primitives.Point;
 import primitives.Ray;
 import primitives.Vector;
 
+import java.util.List;
+
 /**
  * Class representing a tube in 3D space.
  */
@@ -21,18 +23,22 @@ public class Tube extends RadialGeometry {
         this.axisRay = axisRay;
     }
 
-    /**
-     *  Calculates the normal vector to the tube at a given point on its surface.
-     * @param point the point on the geometry surface where the normal is to be computed
-     * @return the normal vector to the surface at the given point (currently returns null)
-     */
+    @Override
     public Vector getNormal(Point point) {
-        Point p0 = axisRay.getOrigin();
-        Vector dir = axisRay.getDirection();
+        Point p0 = this.axisRay.getPoint(0);
 
-        double t = dir.dotProduct(point.subtract(p0));
-        Point point1 = p0.add(dir.scale(t));
+        //calculate the projection of the point on the axis
+        double t = this.axisRay.getDirection().dotProduct(point.subtract(p0));
+        if (t == 0)//if the vector is orthogonal to the axis
+            return point.subtract(p0).normalize();
 
-        return point.subtract(point1).normalize();
+        //find center of the tube
+        //return the normalized vector from the center of the tube to the point
+        return point.subtract(this.axisRay.getPoint(t)).normalize();
+    }
+
+    @Override
+    public List<Point> findIntersections(Ray ray) {
+        return null;
     }
 }

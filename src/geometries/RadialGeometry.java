@@ -3,7 +3,7 @@ package geometries;
 /**
  * Abstract class for radial geometries (e.g., Sphere, Tube).
  */
-public abstract class RadialGeometry extends Geometry {
+public abstract class RadialGeometry implements Geometry {
     protected final double radius;
 
     /**
