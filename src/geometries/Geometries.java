@@ -45,6 +45,7 @@ public class Geometries implements Intersectable {
     public void add(Intersectable... geometries) {
         geometricBodies.addAll(List.of(geometries));
     }
+    //ch
 
     /**
      * Finds the intersections of a ray with all the geometries in the list.
