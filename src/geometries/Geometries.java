@@ -48,6 +48,5 @@ public class Geometries implements Intersectable{
             }
         }
         return intersections;
-        //here i am
     }
 }
