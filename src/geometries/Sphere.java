@@ -30,6 +30,7 @@ public class Sphere extends RadialGeometry {
     public Vector getNormal(Point point) {
         return point.subtract(center).normalize();
     }
+
     @Override
     public List<Point> findIntersections(Ray ray) {
         Point p0 = ray.getPoint(0);

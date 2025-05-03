@@ -42,7 +42,7 @@ class SphereTest {
 
     @Test
     void testFindIntersections() {
-        Sphere sphere = new Sphere( p8,1);
+        final Sphere sphere = new Sphere( p8,1);
 
         // ============ Equivalence Partitions Tests ==============
 
