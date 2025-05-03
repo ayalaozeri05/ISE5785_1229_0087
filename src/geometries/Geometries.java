@@ -1,70 +1,53 @@
 package geometries;
 
+import primitives.Point;
+import primitives.Ray;
+
 import java.util.LinkedList;
 import java.util.List;
 
-import primitives.Ray;
-import primitives.Point;
+import static java.util.Collections.addAll;
 
 /**
- * The Geometries class represents a collection of intersectable geometries.
- * It extends the Intersectable class and stores a list of intersectable
- * objects. This class allows for adding intersectable objects to the list and
- * finding the intersections of a ray with the geometries in the list.
- *
- * @author Odeya and Atara
+ * class for collection of shapes
+ * @author Sagiv Maoz and Yair Elhasid
  */
-public class Geometries implements Intersectable {
+public class Geometries implements Intersectable{
+    private final LinkedList<Intersectable> intersectables = new LinkedList<>();
 
     /**
-     * A list of intersectable objects (geometric bodies).
+     * empty constructor
      */
-    private final List<Intersectable> geometricBodies = new LinkedList<>();
-
+    public Geometries(){}
     /**
-     * Default constructor that initializes an empty list of bodies.
+     * constructor that get unknown amount of geometries
      */
-    public Geometries() {
-    }
-
-    /**
-     * Constructor that initializes the list of bodies with the given geometries.
-     *
-     * @param geometries the geometries to be added to the list
-     */
-    public Geometries(Intersectable... geometries) {
+    public Geometries(Intersectable... geometries){
         add(geometries);
     }
 
     /**
-     * Adds a variable number of intersectable objects to the list.
-     *
-     * @param geometries A variable number of intersectable objects to add to the
-     *                   list.
+     * add new geometries to the list
+     * @param geometries - collection of geometries
      */
-    public void add(Intersectable... geometries) {
-        geometricBodies.addAll(List.of(geometries));
+    public void add(Intersectable... geometries){
+        addAll(intersectables, geometries);
     }
-    //ch
-
-    /**
-     * Finds the intersections of a ray with all the geometries in the list.
-     *
-     * @param ray The ray to check for intersections.
-     * @return A list of intersection points, or null if there are no
-     * intersections.
-     */
     @Override
-    public List<Point> findIntersections(Ray ray) {
-        List<Point> intersections = new LinkedList<>();
-        for (Intersectable geometry : geometricBodies) {
-            List<Point> currentIntersections = geometry.findIntersections(ray);
-            if (currentIntersections != null) {
-                intersections.addAll(currentIntersections);
+    public List<Point> findIntersections(Ray ray){
+        List<Point> intersections = null;
+        for(Intersectable intersectable : intersectables){
+            var currentIntersections = intersectable.findIntersections(ray);
+            if(currentIntersections != null){
+                if(intersections == null){
+                    intersections = new LinkedList<>(currentIntersections);
+                }
+                else{
+                    intersections.addAll(currentIntersections);
+                }
             }
         }
-        return intersections.isEmpty() ? null : intersections;
+        return intersections;
+        //here i am
     }
-
-
 }
