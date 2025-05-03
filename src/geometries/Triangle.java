@@ -18,7 +18,7 @@ public class Triangle extends Polygon {
      * @param p2 second vertex
      * @param p3 third vertex
      */
-   public Triangle(Point p1, Point p2, Point p3) {
+    public Triangle(Point p1, Point p2, Point p3) {
         super(p1, p2, p3);
     }
 
@@ -26,8 +26,8 @@ public class Triangle extends Polygon {
     public List<Point> findIntersections(Ray ray) {
         // Find intersections of the ray with the plane.
         var listPoint = plane.findIntersections(ray);
-        if (listPoint.isEmpty())
-            return listPoint;
+        if (listPoint==null)
+            return null;
 
         // Calculate vectors from the ray's head to the vertices of the triangle.
         Vector v1 = vertices.get(0).subtract(ray.getOrigin());
@@ -53,7 +53,7 @@ public class Triangle extends Polygon {
 
         // Return intersection points if the ray intersects the triangle, otherwise return an empty list.
         if (flag)
-            return listPoint;
+            return listPoint.isEmpty()?null:listPoint;
         else
             return null;
     }

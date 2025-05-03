@@ -39,21 +39,22 @@ public class Plane implements Geometry {
 
     @Override
     public Vector getNormal(Point point) {
-       return normal;
+        return normal;
     }
+
     @Override
     public List<Point> findIntersections(Ray ray) {
         //Check if the Q-P0 is the ZERO Vector
         if (point.equals(ray.getOrigin()))
-            return List.of();       //Check if the ray is parallel to the plane
+            return null;       //Check if the ray is parallel to the plane
         if (isZero(normal.dotProduct(ray.getDirection())))
-            return List.of();       //Calculate the Scalar t that will give us the point of Intersection with the plane
+            return null;       //Calculate the Scalar t that will give us the point of Intersection with the plane
         double t = normal.dotProduct(point.subtract(ray.getOrigin())) / normal.dotProduct(ray.getDirection());
         if (t <= 0 || isZero(t))
-            return List.of();
+            return null;
 
         return List.of(ray.getPoint(t));
 
     }
 
-    }
+}
