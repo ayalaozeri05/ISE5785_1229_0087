@@ -91,7 +91,7 @@ class PlaneTest {
         );
         // TC02: Not intersecting the plane
         assertEquals(
-                List.of(),
+                null,
                 pl1.findIntersections(new Ray(new Point(3, 2, 4), vRegular)),
                 "ERROR: findIntersections when a regular vector (not parallel not perpendicular) isn't intersecting the plane"
         );
@@ -100,14 +100,13 @@ class PlaneTest {
 
         // **** Group 2: Ray is parallel to the plane
         // TC03: Parallel and outside the plane
-        assertEquals(
-                List.of(),
+        assertEquals(null,
                 pl1.findIntersections(new Ray(new Point(1, 0, 0), vParallel)),
                 "ERROR: No intersection expected when the ray is parallel to the plane and outside it (TC03)"
         );
         // TC04: Parallel and inside the plane
         assertEquals(
-                List.of(),
+                null,
                 pl1.findIntersections(new Ray(new Point(0, 0, 0), vParallel)),
                 "ERROR: No intersection expected when the ray is parallel to the plane and inside it (TC04)"
         );
@@ -121,13 +120,13 @@ class PlaneTest {
         );
         // TC06: Starts inside the plane
         assertEquals(
-                List.of(),
+                null,
                 pl1.findIntersections(new Ray(new Point(0, 0, 0), vPerpendicular)),
                 "ERROR: No intersection expected when the ray is perpendicular to the plane and starts inside it (TC06)"
         );
         // TC07: Starts after the plane
         assertEquals(
-                List.of(),
+                null,
                 pl1.findIntersections(new Ray(new Point(1, 0, 0), vPerpendicular)),
                 "ERROR: No intersection expected when the ray is perpendicular to the plane and starts after it (TC07)"
         );
@@ -135,13 +134,13 @@ class PlaneTest {
         // **** Group 4: Special cases with vectors starting on the plane
         // TC08: Regular vector starts on the plane
         assertEquals(
-                List.of(),
+                null,
                 pl1.findIntersections(new Ray(new Point(0, 3, 5), vRegular)),
                 "ERROR: findIntersections when a regular vector (not parallel not perpendicular) starts on the plane"
         );
         // TC09: Regular vector starts at the point stored in the plane
         assertEquals(
-                List.of(),
+                null,
                 pl1.findIntersections(new Ray(new Point(0, 0, 0), vRegular)),
                 "ERROR: findIntersections when a regular vector (not parallel not perpendicular) starts on the plane on the point that stored in the plane"
         );
