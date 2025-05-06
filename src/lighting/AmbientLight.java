@@ -1,42 +1,33 @@
 package lighting;
 
 import primitives.Color;
-import primitives.Double3;
 
 /**
- * AmbientLight class represents the ambient light in the scene
+ * Class representing ambient light (global background illumination).
  */
 public class AmbientLight {
-    /**
-     * NONE is a constant for no ambient light
-     */
-    public final static AmbientLight NONE = new AmbientLight(Color.BLACK, 0.0);
+
+    /** Constant instance representing no ambient light (black) */
+    public static final AmbientLight NONE = new AmbientLight(Color.BLACK);
+
+    /** The intensity (color) of the ambient light */
     private final Color intensity;
 
     /**
-     * Constructor for AmbientLight
-     * @param ia the intensity of the ambient light
-     * @param ka the coefficient of the ambient light
+     * Constructor for AmbientLight.
+     *
+     * @param Ia the intensity (RGB color) of the ambient light
      */
-    public AmbientLight(Color ia, Double3 ka) {
-        intensity = ia.scale(ka);
+    public AmbientLight(Color Ia) {
+        this.intensity = Ia;
     }
 
     /**
-     * Constructor for AmbientLight
-     * @param ia the intensity of the ambient light
-     * @param ka the coefficient of the ambient light
-     */
-    public AmbientLight(Color ia, double ka) {
-        intensity = ia.scale(ka);
-    }
-
-    /**
-     * Getter for the intensity of the ambient light
-     * @return the intensity of the ambient light
+     * Getter for the intensity of the ambient light.
+     *
+     * @return the color representing the intensity
      */
     public Color getIntensity() {
         return intensity;
     }
-
 }

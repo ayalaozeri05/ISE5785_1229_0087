@@ -1,5 +1,7 @@
 package primitives;
 
+import java.util.List;
+
 /**
  * Represents a ray in 3D space.
  */
@@ -63,4 +65,23 @@ public class Ray {
     public String toString() {
         return "Ray [origin=" + origin + ", direction=" + direction + "]";
     }
+
+    /**
+     *  method to find the closest point to the head of the ray
+     * @param points list of points
+     * @return the closest point to the head of the ray
+     */
+    public Point findClosestPoint(List<Point> points) {
+        Point closest = null;
+        double minDistance = Double.POSITIVE_INFINITY;
+        for (Point point : points) {
+            double distance = origin.distance(point);
+            if (distance < minDistance) {
+                minDistance = distance;
+                closest = point;
+            }
+        }
+        return closest;
+    }
+
 }

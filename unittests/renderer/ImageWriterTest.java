@@ -23,6 +23,6 @@ class ImageWriterTest {
                 }
             }
 
-
+            imageWriter.writeToImage("FirstTestImage");
         }, "Failed to create image");
     }}
