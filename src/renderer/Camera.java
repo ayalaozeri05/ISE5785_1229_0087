@@ -35,14 +35,14 @@ public class Camera implements Cloneable {
         imageWriter.writePixel(j, i, color);
 
     }
-}
+
 
 /**
  * Render the image
  */
 public Camera renderImage() {
     int ny = imageWriter.nY();
-    int nx = imageWriter.getNx();
+    int nx = imageWriter.nX();
     for (int i = 0; i < ny; i++) {
         for (int j = 0; j < nx; j++) {
             castRay(nx, ny, i, j);

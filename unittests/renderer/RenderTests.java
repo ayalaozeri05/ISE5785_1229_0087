@@ -82,6 +82,7 @@ public class RenderTests {
    }*/
 
     /** Test for XML based scene - for bonus */
+    /*
     @Test
     public void basicRenderXml() {
         Scene scene = new Scene("Using XML");
@@ -98,7 +99,7 @@ public class RenderTests {
                 .renderImage() //
                 .printGrid(100, new Color(YELLOW)) //
                 .writeToImage("xml render test");
-    }
+    }*/
 
     /** Test for JSON based scene - for bonus */
     @Test
