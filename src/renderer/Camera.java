@@ -1,7 +1,6 @@
 package renderer;
-
 import primitives.*;
-
+import scene.Scene;
 import java.util.MissingResourceException;
 
 
@@ -17,6 +16,66 @@ public class Camera implements Cloneable {
     private double width = 0.0;
     private double height = 0.0;
     private double distance = 0.0;
+    private ImageWriter imageWriter;
+    private RayTracerBase rayTracer;
+    public int nX=1;
+    public int nY=1;
+
+
+    /**
+     * Cast a ray through a pixel
+     * @param nx the number of pixels in the x direction
+     * @param ny the number of pixels in the y direction
+     * @param i the y index of the pixel
+     * @param j the x index of the pixel
+     */
+    private void castRay(int nx, int ny, int i, int j) {
+        Ray ray = constructRay(nx, ny, j, i);
+        Color color = rayTracer.traceRay(ray);
+        imageWriter.writePixel(j, i, color);
+
+    }
+
+
+/**
+ * Render the image
+ */
+public Camera renderImage() {
+    int ny = imageWriter.nY();
+    int nx = imageWriter.nX();
+    for (int i = 0; i < ny; i++) {
+        for (int j = 0; j < nx; j++) {
+            castRay(nx, ny, i, j);
+        }
+    }
+    return this;
+}
+
+    /**
+     * Print a grid on the image
+     * @param interval the interval between the lines of the grid
+     * @param color the color of the grid
+     */
+    public Camera printGrid(int interval, Color color) {
+        for(int i = 0; i < imageWriter.nY(); i++) {
+            for(int j = 0; j < imageWriter.nX(); j++) {
+                if(i % interval == 0 || j % interval == 0) {
+                    imageWriter.writePixel(j, i, color);
+                }
+            }
+        }
+        return this;
+    }
+
+    /**
+     * Write the image to a file with the given filename (without extension)
+     * @param fileName the name of the file to save the image to (without extension)
+     * @return the camera object itself
+     */
+    public Camera writeToImage(String fileName) {
+        imageWriter.writeToImage(fileName); // assuming imageWriter has a method that accepts a file name
+        return this;
+    }
 
     /**
      * Camera getter
@@ -82,6 +141,27 @@ public class Camera implements Cloneable {
      */
     public static class Builder {
         private final Camera camera = new Camera();
+
+
+        /**
+         * Sets the ray tracer engine for the camera.
+         *
+         * @param scene the scene to trace rays in
+         * @param type the type of ray tracer to use
+         * @return the builder instance for method chaining
+         */
+        public Builder setRayTracer(Scene scene, RayTracerType type) {
+            switch (type) {
+                case SIMPLE:
+                    camera.rayTracer = new SimpleRayTracer(scene);
+                    break;
+                default:
+                    camera.rayTracer = null;
+                    break;
+            }
+            return this;
+        }
+
 
         /**
          * Set the location of the camera
@@ -171,6 +251,8 @@ public class Camera implements Cloneable {
          * @return the builder instance for method chaining
          */
         public Builder setResolution(int nX, int nY) {
+            camera.nX = nX;
+            camera.nY = nY;
             return this;
         }
 
@@ -195,6 +277,14 @@ public class Camera implements Cloneable {
                 throw new MissingResourceException(description, className, "height");
             if(camera.distance == 0.0)
                 throw new MissingResourceException(description, className, "distance");
+
+            if (camera.nX <= 0 || camera.nY <= 0)
+                throw new IllegalArgumentException("nX and nY must be positive");
+
+            camera.imageWriter = new ImageWriter(camera.nX, camera.nY);
+
+            if (camera.rayTracer == null)
+                camera.rayTracer = new SimpleRayTracer(null);
 
             camera.vRight = camera.vTo.crossProduct(camera.vUp).normalize();
 
@@ -222,6 +312,8 @@ public class Camera implements Cloneable {
                 return null;
             }
         }
+
+
     }
 
     /**
