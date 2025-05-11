@@ -171,7 +171,6 @@ public class Camera implements Cloneable {
          * @return the builder instance for method chaining
          */
         public Builder setResolution(int nX, int nY) {
-            // Placeholder method - no action taken at this stage
             return this;
         }
 
@@ -220,7 +219,7 @@ public class Camera implements Cloneable {
             try {
                 return (Camera) camera.clone();
             } catch (CloneNotSupportedException e) {
-                throw new RuntimeException(e);
+                return null;
             }
         }
     }
