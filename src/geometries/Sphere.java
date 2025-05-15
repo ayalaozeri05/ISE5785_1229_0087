@@ -30,34 +30,46 @@ public class Sphere extends RadialGeometry {
     public Vector getNormal(Point point) {
         return point.subtract(center).normalize();
     }
+
+
     @Override
-    public List<Point> findIntersections(Ray ray) {
-        Point p0 = ray.getPoint(0);
+    protected List<Intersection> calculateIntersectionsHelper(Ray ray) {
+        Point p0 = ray.getOrigin();
         Vector dir = ray.getDirection();
 
-        // if the ray starts at the center of the sphere
-        if (center.equals(p0))
-            return List.of(p0.add(dir.scale(radius)));
+        // Special case: ray starts at the center of the sphere
+        if (center.equals(p0)) {
+            Point point = p0.add(dir.scale(radius));
+            return List.of(new Intersection(this, point));
+        }
 
-        Vector u = (center.subtract(p0));
+        Vector u = center.subtract(p0);
         double tm = dir.dotProduct(u);
-        double d = Util.alignZero(Math.sqrt(u.lengthSquared() - tm * tm));
-        if (d >= radius)
+        double dSquared = u.lengthSquared() - tm * tm;
+
+        // If the distance from the ray to the center is greater than the radius, no intersection
+        double radiusSquared = radius * radius;
+        if (dSquared >= radiusSquared)
             return null;
 
-        double th = Math.sqrt(radius * radius - d * d);
+        double th = Math.sqrt(radiusSquared - dSquared);
         double t1 = Util.alignZero(tm - th);
         double t2 = Util.alignZero(tm + th);
 
-        // if the ray starts before the sphere
-        if (t1 > 0 && t2 > 0)
-            return List.of(p0.add(dir.scale(t1)), p0.add(dir.scale(t2)));
-
-        // if the ray starts inside the sphere
+        // Compute intersection points based on t values
+        Point p1 = null, p2 = null;
         if (t1 > 0)
-            return List.of(p0.add(dir.scale(t1)));
+            p1 = ray.getPoint(t1);
         if (t2 > 0)
-            return List.of(p0.add(dir.scale(t2)));
+            p2 = ray.getPoint(t2);
+
+        // Return appropriate results based on how many valid intersection points found
+        if (p1 != null && p2 != null)
+            return List.of(new Intersection(this, p1), new Intersection(this, p2));
+        if (p1 != null)
+            return List.of(new Intersection(this, p1));
+        if (p2 != null)
+            return List.of(new Intersection(this, p2));
 
         return null;
     }

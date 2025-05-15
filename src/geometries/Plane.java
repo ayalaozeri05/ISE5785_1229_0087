@@ -9,7 +9,7 @@ import static primitives.Util.isZero;
 /**
  * Class representing a plane in 3D space.
  */
-public class Plane implements Geometry {
+public class Plane extends Geometry {
     private final Point point;
     private final Vector normal;
 
@@ -43,18 +43,26 @@ public class Plane implements Geometry {
     }
 
     @Override
-    public List<Point> findIntersections(Ray ray) {
-        //Check if the Q-P0 is the ZERO Vector
-        if (point.equals(ray.getOrigin()))
-            return null;       //Check if the ray is parallel to the plane
-        if (isZero(normal.dotProduct(ray.getDirection())))
-            return null;       //Calculate the Scalar t that will give us the point of Intersection with the plane
-        double t = normal.dotProduct(point.subtract(ray.getOrigin())) / normal.dotProduct(ray.getDirection());
-        if (t <= 0 || isZero(t))
-            return null;
+    protected List<Intersection> calculateIntersectionsHelper(Ray ray) {
+        // Check if the ray origin is the same as the plane point
+        if (point.equals(ray.getOrigin())) return null;
 
-        return List.of(ray.getPoint(t));
+        double nv = normal.dotProduct(ray.getDirection());
 
+        // Check if the ray is parallel to the plane (dot product = 0)
+        if (isZero(nv)) return null;
+
+        // Calculate intersection point's parameter t
+        double t = normal.dotProduct(point.subtract(ray.getOrigin())) / nv;
+
+        // If t is negative or zero, the intersection is behind the ray origin
+        if (t <= 0 || isZero(t)) return null;
+
+        // Compute intersection point
+        Point intersectionPoint = ray.getPoint(t);
+
+        // Return the intersection wrapped in an Intersection object
+        return List.of(new Intersection(this, intersectionPoint));
     }
 
 }

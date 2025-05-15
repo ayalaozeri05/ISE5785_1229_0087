@@ -12,7 +12,7 @@ import static java.util.Collections.addAll;
  * class for collection of shapes
  * @author Sagiv Maoz and Yair Elhasid
  */
-public class Geometries implements Intersectable{
+public class Geometries extends Intersectable{
     private final LinkedList<Intersectable> intersectables = new LinkedList<>();
 
     /**
@@ -34,19 +34,15 @@ public class Geometries implements Intersectable{
         addAll(intersectables, geometries);
     }
     @Override
-    public List<Point> findIntersections(Ray ray){
-        List<Point> intersections = null;
-        for(Intersectable intersectable : intersectables){
-            var currentIntersections = intersectable.findIntersections(ray);
-            if(currentIntersections != null){
-                if(intersections == null){
-                    intersections = new LinkedList<>(currentIntersections);
-                }
-                else{
-                    intersections.addAll(currentIntersections);
-                }
+    public List<Intersection> calculateIntersectionsHelper(Ray ray) {
+        List<Intersection> intersections = new LinkedList<>();
+        for (Intersectable geometry : intersectables) {
+            List<Intersection> geometryIntersections = geometry.calculateIntersections(ray);
+            if (geometryIntersections != null) {
+                intersections.addAll(geometryIntersections);
             }
         }
-        return intersections;
+
+        return intersections.isEmpty() ? null : intersections;
     }
 }

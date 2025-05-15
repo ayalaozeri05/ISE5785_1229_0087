@@ -4,6 +4,8 @@ import primitives.Ray;
 import primitives.Vector;
 
 import java.util.List;
+import java.util.ArrayList;
+
 import static primitives.Util.isZero;
 
 
@@ -23,38 +25,40 @@ public class Triangle extends Polygon {
     }
 
     @Override
-    public List<Point> findIntersections(Ray ray) {
-        // Find intersections of the ray with the plane.
-        var listPoint = plane.findIntersections(ray);
-        if (listPoint==null)
+    protected List<Intersection> calculateIntersectionsHelper(Ray ray) {
+        // Use the old findIntersections method from Plane (which returns List<Point>)
+        List<Point> listPoint = plane.findIntersections(ray);
+
+        if (listPoint == null)
             return null;
 
-        // Calculate vectors from the ray's head to the vertices of the triangle.
+        // Calculate vectors from ray origin to each vertex
         Vector v1 = vertices.get(0).subtract(ray.getOrigin());
         Vector v2 = vertices.get(1).subtract(ray.getOrigin());
         Vector v3 = vertices.get(2).subtract(ray.getOrigin());
 
-        // Calculate normals of the triangle's edges.
+        // Compute normals for the edges
         Vector n1 = v1.crossProduct(v2).normalize();
         Vector n2 = v2.crossProduct(v3).normalize();
         Vector n3 = v3.crossProduct(v1).normalize();
 
-        // Calculate dot products between normals and ray's direction.
+        // Compute dot products between normals and ray direction
         double t1 = n1.dotProduct(ray.getDirection());
         double t2 = n2.dotProduct(ray.getDirection());
         double t3 = n3.dotProduct(ray.getDirection());
 
-        // Check if the ray intersects the triangle.
-        boolean flag = !isZero(t1) && !isZero(t2) && !isZero(t3);
+        // Check if all dot products have the same sign (ray hits inside triangle)
+        if (isZero(t1) || isZero(t2) || isZero(t3)) return null;
+        boolean sameSign = (t1 > 0 && t2 > 0 && t3 > 0) || (t1 < 0 && t2 < 0 && t3 < 0);
 
-        // Check if all the t's have the same sign.
-        if (!flag || !((t1 > 0 && t2 > 0 && t3 > 0) || (t1 < 0 && t2 < 0 && t3 < 0)))
-            flag = false;
+        if (!sameSign) return null;
 
-        // Return intersection points if the ray intersects the triangle, otherwise return an empty list.
-        if (flag)
-            return listPoint.isEmpty()?null:listPoint;
-        else
-            return null;
+        // Convert the intersection point to Intersection object
+        List<Intersection> result = new ArrayList<>();
+        for (Point p : listPoint) {
+            result.add(new Intersection(this, p));
+        }
+
+        return result;
     }
 }
