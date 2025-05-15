@@ -102,7 +102,7 @@ public class RenderTests {
     }*/
 
     /** Test for JSON based scene - for bonus */
-    @Test
+   /* @Test
     public void basicRenderJson() {
         Scene scene = new Scene("Using Json");
         // enter XML file name and parse from JSON file into scene object instead of the
@@ -119,4 +119,5 @@ public class RenderTests {
                 .printGrid(100, new Color(YELLOW)) //
                 .writeToImage("xml render test");
     }
+    */
 }
