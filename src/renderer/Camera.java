@@ -286,7 +286,7 @@ public Camera renderImage() {
             if (camera.rayTracer == null)
                 camera.rayTracer = new SimpleRayTracer(null);
 
-            camera.vRight = camera.vTo.crossProduct(camera.vUp).normalize();
+            camera.vRight = camera.vTo.crossProduct(camera.vUp);
 
             if (!Util.isZero(camera.vTo.dotProduct(camera.vRight)) ||
                     !Util.isZero(camera.vTo.dotProduct(camera.vUp)) ||
