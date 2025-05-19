@@ -65,8 +65,9 @@ public class Color {
 
     /**
      * Operation of adding this and one or more other colors (by component)
-     * @param  colors one or more other colors to add
-     * @return        new Color object which is a result of the operation
+     *
+     * @param colors one or more other colors to add
+     * @return new Color object which is a result of the operation
      */
     public Color add(Color... colors) {
         double rr = rgb.d1();

@@ -61,7 +61,7 @@ class RenderTests {
         Scene scene = new Scene("Multi color").setAmbientLight(new AmbientLight(new Color(51, 51, 51)));
         scene.geometries //
                 .add(// center
-                        new Sphere(new Point(0, 0, -100), 50),
+                        new Sphere(new Point(0, 0, -100), 50).setEmission(new Color(red)),
                         // up left
                         new Triangle(new Point(-100, 0, -100), new Point(0, 100, -100), new Point(-100, 100, -100)) //
                                 .setEmission(new Color(GREEN)),
@@ -117,5 +117,37 @@ class RenderTests {
                 .renderImage() //
                 .printGrid(100, new Color(YELLOW)) //
                 .writeToImage("xml render test");
+    }
+
+    /**
+     * Renders a simple scene without emission colors and adds material attenuation coefficients
+     */
+    @Test
+    void renderMaterialTest() {
+        Scene scene = new Scene("Material test")
+                .setAmbientLight(new AmbientLight(new Color(WHITE)));
+
+        scene.geometries.add(
+                // Sphere – Ka = (0.4)
+                new Sphere(new Point(0, 0, -100), 50d)
+                        .setMaterial(new Material().setKA(new Double3(0.4))),
+                // Red triangle – Ka = (0.8, 0, 0)
+                new Triangle(new Point(-100, 0, -100), new Point(0, -100, -100), new Point(-100, -100, -100))
+                        .setMaterial(new Material().setKA(new Double3(0.8, 0, 0))),
+                // Green triangle – Ka = (0, 0.8, 0)
+                new Triangle(new Point(-100, 0, -100), new Point(0, 100, -100), new Point(-100, 100, -100))
+                        .setMaterial(new Material().setKA(new Double3(0, 0.8, 0))),
+                // Blue triangle – Ka = (0, 0, 0.8)
+                new Triangle(new Point(100, 0, -100), new Point(0, -100, -100), new Point(100, -100, -100))
+                        .setMaterial(new Material().setKA(new Double3(0, 0, 0.8)))
+        );
+
+        camera
+                .setRayTracer(scene, RayTracerType.SIMPLE)
+                .setResolution(1000, 1000)
+                .build()
+                .renderImage()
+                .printGrid(100, new Color(WHITE))
+                .writeToImage("material render");
     }
 }

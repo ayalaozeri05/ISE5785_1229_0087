@@ -1,72 +1,71 @@
 package geometries;
 
-import primitives.Point;
-import primitives.Ray;
+import lighting.LightSource;
+import primitives.*;
 
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
- * Abstract base class for all geometries that can be intersected by a ray
+ * The Intersectable interface defines a contract for geometric shapes
+ * that can be intersected by rays.
+ * It provides a method to find the intersection points of a ray with the shape.
  */
 public abstract class Intersectable {
-
     /**
-     * Passive data structure representing an intersection point and its geometry
+     * Finds the intersection points of a given ray with the shape.
+     *
+     * @param ray The ray to check for intersections.
+     * @return A list of intersection points, or an empty list if there are no intersections.
      */
+    public final List<Point> findIntersections(Ray ray) {
+        var list = calculateIntersections(ray);
+        return list == null ? null : list.stream().map(intersection -> intersection.point).toList();
+    }
+
+    protected abstract List<Intersection> calculateIntersectionsHelper(Ray ray);
+
+    public final List<Intersection> calculateIntersections(Ray ray) {
+        return calculateIntersectionsHelper(ray);
+    }
+
     public static class Intersection {
         public final Geometry geometry;
         public final Point point;
+        public final Material material;
+        public Vector normal;
+        public Vector v;
+        public double vNormal;
+        public LightSource light;
+        public Vector l;
+        public double lNormal;
 
         /**
-         * Constructor for Intersection
-         * @param geometry the intersected geometry
-         * @param point the intersection point
+         * Constructor for the Intersection class.
+         * Initializes an intersection with a given geometry and point of intersection.
+         * If the geometry is not null, the material is taken from the geometry;
+         * otherwise, a default material is used.
+         *
+         * @param geometry the geometry object that was intersected
+         * @param point    the point at which the intersection occurred
          */
         public Intersection(Geometry geometry, Point point) {
             this.geometry = geometry;
             this.point = point;
+            if (geometry != null) this.material = geometry.getMaterial();
+            else this.material = new Material();
         }
 
         @Override
         public boolean equals(Object obj) {
             if (this == obj) return true;
-            if (obj == null || getClass() != obj.getClass()) return false;
-            Intersection other = (Intersection) obj;
-            return geometry == other.geometry && point.equals(other.point);
+            return obj instanceof Intersection other &&
+                    geometry == (other.geometry) && point.equals(other.point);
         }
 
         @Override
         public String toString() {
-            return "Intersection{geometry=" + geometry + ", point=" + point + "}";
+            return "GeoPoint{" + "geometry=" + geometry + ", point=" + point + '}';
         }
-    }
 
-    /**
-     * NVI method: public method that uses protected helper
-     * @param ray the ray to intersect with
-     * @return list of intersection objects (geometry + point)
-     */
-    public final List<Intersection> calculateIntersections(Ray ray) {
-        return calculateIntersectionsHelper(ray);
-    }
-
-    /**
-     * Helper method to be implemented in derived classes
-     * @param ray the ray to intersect with
-     * @return list of intersection objects (geometry + point)
-     */
-    protected abstract List<Intersection> calculateIntersectionsHelper(Ray ray);
-
-    /**
-     * Returns only the intersection points from the full intersection data
-     * @param ray the ray to intersect with
-     * @return list of intersection points (or null if none)
-     */
-    public final List<Point> findIntersections(Ray ray) {
-        var intersections = calculateIntersections(ray);
-        return intersections == null ? null
-                : intersections.stream().map(intersection -> intersection.point).toList();
     }
 }
