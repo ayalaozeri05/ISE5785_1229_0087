@@ -9,6 +9,12 @@ import geometries.Intersectable.Intersection;
  * Represents a ray in 3D space.
  */
 public class Ray {
+
+    /**
+     * A small value used to determine if a value is close to zero.
+     */
+    private static final double DELTA = 0.1;
+
     /**
      * The starting point of the ray.
      */
@@ -55,6 +61,21 @@ public class Ray {
         this.origin = origin;
         this.direction = direction.normalize(); // Ensures the direction is normalized
     }
+
+    /**
+     * Constructs a Ray from a point and direction, offset by DELTA in the direction of the normal.
+     *
+     * @param head      The origin point of the ray.
+     * @param direction The direction vector.
+     * @param normal    The surface normal at the origin point.
+     */
+    public Ray(Point head, Vector direction, Vector normal) {
+        this.direction = direction.normalize();
+        double nv = direction.dotProduct(normal);
+        Vector delta = normal.scale(nv > 0 ? DELTA : -DELTA);
+        this.origin= head.add(delta);
+    }
+
 
     @Override
     public boolean equals(Object obj) {

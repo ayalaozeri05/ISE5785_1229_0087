@@ -1,6 +1,8 @@
 package geometries;
 
 import static java.lang.Double.*;
+
+import java.util.LinkedList;
 import java.util.List;
 import static primitives.Util.*;
 import primitives.*;
@@ -79,9 +81,40 @@ public class Polygon extends Geometry {
 
     @Override
     public Vector getNormal(Point point) { return plane.getNormal(point); }
-
     @Override
-    protected List<Intersection> calculateIntersectionsHelper(Ray ray) {
-        return null;
+    public List<Intersection> calculateIntersectionsHelper(Ray ray) {
+        // Check intersection with the polygon's plane
+        List<Point> intersections = plane.findIntersections(ray);
+        if (intersections == null)
+            return null;
+
+        //  Extract the intersection point and ray origin/direction
+        Point p0 = ray.getOrigin();             // Ray origin
+        Vector v = ray.getDirection();        // Ray direction
+
+        // Build vectors from ray origin to all polygon vertices
+        List<Vector> vectors = new LinkedList<>();
+        for (Point vertex : vertices) {
+            vectors.add(vertex.subtract(p0));
+        }
+
+        // cross products between edges to determine if point is inside
+        int sign = 0;
+        for (int i = 0; i < size; i++) {
+            // Calculate normal to the triangle formed by two adjacent edges
+            Vector n = vectors.get(i).crossProduct(vectors.get((i + 1) % size)).normalize();
+            double dotProd = v.dotProduct(n);
+
+            if (i == 0) {
+                sign = dotProd > 0 ? 1 : -1;
+            }
+
+            // If dot product sign changes or is zero => point is outside
+            if (!compareSign(sign, dotProd) || isZero(dotProd)) {
+                return null;
+            }
+        }
+        // If point is inside, return it as the intersection result
+        return List.of(new Intersection(this, intersections.getFirst()));
     }
 }

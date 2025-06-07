@@ -22,6 +22,19 @@ public class Material {
     /**
      * kT is the transparency factor
      */
+
+    /**
+     * The transmission coefficient of the material.
+     * It is represented as a Double3 object.
+     */
+    public Double3 kT = Double3.ZERO;
+
+    /**
+     * The reflection coefficient of the material.
+     * It is represented as a Double3 object.
+     */
+    public Double3 kR = Double3.ZERO;
+
     public int nsh = 0;
 
     /**
@@ -91,6 +104,50 @@ public class Material {
      */
     public Material setShininess(int nSH) {
         this.nsh = nSH;
+        return this;
+    }
+
+    /**
+     * Sets the transmission coefficient of the material.
+     *
+     * @param kT The transmission coefficient.
+     * @return The current Material object.
+     */
+    public Material setKT(Double3 kT) {
+        this.kT = kT;
+        return this;
+    }
+
+    /**
+     * Sets the transmission coefficient of the material.
+     *
+     * @param kT The transmission coefficient.
+     * @return The current Material object.
+     */
+    public Material setKT(double kT) {
+        this.kT = new Double3(kT);
+        return this;
+    }
+
+    /**
+     * Sets the reflection coefficient of the material.
+     *
+     * @param kR The reflection coefficient.
+     * @return The current Material object.
+     */
+    public Material setKR(Double3 kR) {
+        this.kR = kR;
+        return this;
+    }
+
+    /**
+     * Sets the reflection coefficient of the material.
+     *
+     * @param kR The reflection coefficient.
+     * @return The current Material object.
+     */
+    public Material setKR(double kR) {
+        this.kR = new Double3(kR);
         return this;
     }
 }

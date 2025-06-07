@@ -6,6 +6,7 @@ import primitives.Vector;
 import java.util.List;
 import java.util.ArrayList;
 
+import static primitives.Util.alignZero;
 import static primitives.Util.isZero;
 
 
@@ -25,40 +26,30 @@ public class Triangle extends Polygon {
     }
 
     @Override
-    protected List<Intersection> calculateIntersectionsHelper(Ray ray) {
-        // Use the old findIntersections method from Plane (which returns List<Point>)
-        List<Point> listPoint = plane.findIntersections(ray);
-
-        if (listPoint == null)
+    public List<Intersection> calculateIntersectionsHelper(Ray ray) {
+        List<Point> intersections = plane.findIntersections(ray);
+        // the ray is not intersecting the plane
+        if (intersections == null)
             return null;
+        // the ray is intersecting the plane
+        Point head = ray.getOrigin();//the start ray point
+        Vector dir = ray.getDirection();
 
-        // Calculate vectors from ray origin to each vertex
-        Vector v1 = vertices.get(0).subtract(ray.getOrigin());
-        Vector v2 = vertices.get(1).subtract(ray.getOrigin());
-        Vector v3 = vertices.get(2).subtract(ray.getOrigin());
+        Vector v1 = vertices.get(0).subtract(head);
+        Vector v2 = vertices.get(1).subtract(head);
+        double s1 = alignZero(dir.dotProduct(v1.crossProduct(v2)));
+        //checks the point is on the 1st edge
+        if (s1 == 0) return null;
 
-        // Compute normals for the edges
-        Vector n1 = v1.crossProduct(v2).normalize();
-        Vector n2 = v2.crossProduct(v3).normalize();
-        Vector n3 = v3.crossProduct(v1).normalize();
+        Vector v3 = vertices.get(2).subtract(head);
+        double s2 = alignZero(dir.dotProduct(v2.crossProduct(v3)));
+        //checks the point is out of triangle or on the 2nd edge
+        if (s1 * s2 <= 0) return null;
 
-        // Compute dot products between normals and ray direction
-        double t1 = n1.dotProduct(ray.getDirection());
-        double t2 = n2.dotProduct(ray.getDirection());
-        double t3 = n3.dotProduct(ray.getDirection());
+        double s3 = alignZero(dir.dotProduct(v3.crossProduct(v1)));
+        //checks the point is out of triangle or on the 3rd edge
+        if (s1 * s3 <= 0) return null;
 
-        // Check if all dot products have the same sign (ray hits inside triangle)
-        if (isZero(t1) || isZero(t2) || isZero(t3)) return null;
-        boolean sameSign = (t1 > 0 && t2 > 0 && t3 > 0) || (t1 < 0 && t2 < 0 && t3 < 0);
-
-        if (!sameSign) return null;
-
-        // Convert the intersection point to Intersection object
-        List<Intersection> result = new ArrayList<>();
-        for (Point p : listPoint) {
-            result.add(new Intersection(this, p));
-        }
-
-        return result;
+        return List.of(new Intersection(this, intersections.getFirst()));
     }
 }
