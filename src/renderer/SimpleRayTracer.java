@@ -8,6 +8,8 @@ import primitives.Ray;
 import primitives.Vector;
 import scene.Scene;
 
+import java.util.List;
+
 import static primitives.Util.alignZero;
 //
 
@@ -19,6 +21,9 @@ import static primitives.Util.alignZero;
  * @author Odeya and Atara
  */
 public class SimpleRayTracer extends RayTracerBase {
+    private static final double DELTA = 0.1;
+
+
 
     /**
      * Constructor for SimpleRayTracer.
@@ -105,8 +110,9 @@ public class SimpleRayTracer extends RayTracerBase {
             // Update light source data in the intersection object
             if (!setLightSource(intersection, light)) {
                 continue; // Skip to the next light source if setLightSource returns false
-            }
 
+            }
+            if (!unshaded(intersection)) continue;
             // Calculate the light intensity at the intersection point
             Color lightIntensity = light.getIntensity(intersection.point);
 
@@ -150,6 +156,28 @@ public class SimpleRayTracer extends RayTracerBase {
      */
     private Double3 calcDiffusive(Intersection intersection) {
         return intersection.material.kD.scale(Math.abs(intersection.lNormal));
+    }
+
+
+    /**
+     * Checks whether a given intersection point is illuminated (not in shadow)
+     * by verifying that no geometry blocks the light before it reaches the point.
+     *
+     * @param intersection the intersection containing light direction and geometry
+     * @return true if the point is illuminated (not in shadow), false otherwise
+     */
+    private boolean unshaded(Intersection intersection) {
+        Vector pointToLight = intersection.l.scale(-1);
+        Vector delta = intersection.normal.scale(intersection.lNormal < 0 ? DELTA : -DELTA);
+        Ray shadowRay = new Ray(intersection.point.add(delta), pointToLight);
+        List<Intersection> intersections = scene.geometries.calculateIntersections(shadowRay);
+        if (intersections == null) return true;
+        for (Intersection i : intersections) {
+            if (i.geometry != intersection.geometry) {
+                return false;
+            }
+        }
+        return true;
     }
 
 }
