@@ -23,6 +23,7 @@ class RenderTests {
             .setLocation(Point.ZERO).setDirection(new Point(0, 0, -1), Vector.AXIS_Y) //
             .setVpDistance(100) //
             .setVpSize(500, 500);
+    //check
 
     /**
      * Produce a scene with basic 3D model and render it into a png image with a
