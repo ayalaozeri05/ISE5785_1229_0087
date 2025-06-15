@@ -163,7 +163,7 @@ public class SimpleRayTracer extends RayTracerBase {
      * Calculates the reflected ray starting from the intersection point.
      *
      * @param intersection the intersection point
-     * @return the reflected ray
+     * @return the reflected ray(mirror)
      */
     private Ray constructReflectedRay(Intersection intersection) {
         Vector r = intersection.v.add((intersection.normal.scale(-2 * intersection.vNormal)));
