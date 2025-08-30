@@ -112,6 +112,20 @@ public class Color {
         return new Color(rgb.reduce(k));
     }
 
+
+    /**
+     * Computes the maximum absolute difference between the RGB components of two colors.
+     *
+     * @param other the other color to compare with
+     * @return the maximum absolute difference between RGB components
+     */
+    public double difference(Color other) {
+        double dr = Math.abs(this.rgb.d1() - other.rgb.d1());
+        double dg = Math.abs(this.rgb.d2() - other.rgb.d2());
+        double db = Math.abs(this.rgb.d3() - other.rgb.d3());
+        return Math.max(dr, Math.max(dg, db));
+    }
+
     @Override
     public String toString() { return "rgb:" + rgb; }
 }

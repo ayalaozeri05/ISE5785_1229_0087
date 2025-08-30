@@ -2,11 +2,10 @@ package renderer;
 import primitives.*;
 import scene.Scene;
 
-
 import java.util.LinkedList;
 import java.util.List;
 import java.util.MissingResourceException;
-
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Camera class represents a camera in the 3D space
@@ -25,8 +24,17 @@ public class Camera implements Cloneable {
     public int nX=1;
     public int nY=1;
 
-
     private BlackBoard blackBoard;
+
+    //MT
+    private boolean multithreading = false;
+    private int threadsCount = Runtime.getRuntime().availableProcessors();
+
+    // ASS
+    private boolean adaptiveAntiAliasing = false;
+    private int maxAdaptiveDepth = 2;
+    private double adaptiveThreshold = 10.0;
+    private static final double MIN_PIXEL_SIZE = 0.0001;
 
 
     /**
@@ -40,19 +48,25 @@ public class Camera implements Cloneable {
         int nY = this.nY;
         Color color = Color.BLACK;
 
-        if (blackBoard.getIsAntiAliasingEnabled()) {
+        if (adaptiveAntiAliasing) { //MP2
+            double Ry = height / nY;
+            double Rx = width / nX;
+            double Yi = -(i - (nY - 1) / 2d) * Ry;
+            double Xj = (j - (nX - 1) / 2d) * Rx;
+            color = adaptiveAntiAliasing(nX, nY, j, i,
+                    maxAdaptiveDepth, Rx, Ry, Xj, Yi);
+        } else if (blackBoard.getIsAntiAliasingEnabled()) { //MP1
             List<Ray> rays = constructRays(nX, nY, j, i);
             for (Ray ray : rays) {
                 color = color.add(rayTracer.traceRay(ray));
             }
             color = color.reduce(rays.size());
-        } else {
+        } else { //REGULAR
             Ray ray = constructRay(nX, nY, j, i);
             color = rayTracer.traceRay(ray);
         }
 
         imageWriter.writePixel(j, i, color);
-     //   pixelManager.pixelDone();
     }
 
 
@@ -62,6 +76,9 @@ public class Camera implements Cloneable {
      * @return this camera after rendering
      */
     public Camera renderImage() {
+        if (multithreading) {
+            return renderImageMultiThreaded();
+        }
         int ny = imageWriter.nY();
         int nx = imageWriter.nX();
         for (int i = 0; i < ny; i++) {
@@ -72,6 +89,59 @@ public class Camera implements Cloneable {
         return this;
     }
 
+    /**
+     *  Render image using multithreading
+     */
+    private Camera renderImageMultiThreaded() {
+        final int ny = imageWriter.nY();
+        final int nx = imageWriter.nX();
+
+        Thread[] threads = new Thread[threadsCount];
+        AtomicInteger nextRow = new AtomicInteger(0); // nextRow index
+
+        for (int t = 0; t < threads.length; t++) {
+            threads[t] = new Thread(() -> {
+                int i;
+                while ((i = nextRow.getAndIncrement()) < ny) {
+                    for (int j = 0; j < nx; j++) {
+                        castRay(j, i);
+                    }
+                }
+            });
+        }
+
+        for (Thread thread : threads) thread.start();
+        try {
+            for (Thread thread : threads) thread.join();
+        } catch (InterruptedException e) {
+            throw new RuntimeException("Rendering interrupted", e);
+        }
+
+        return this;
+    }
+
+    /**
+     * Enables or disables multithreading for rendering in the camera.
+     *
+     * @param enabled true to enable multithreading, false to disable it
+     * @return the current Camera instance to allow method chaining
+     */
+    public Camera setMultithreading(boolean enabled) {
+        this.multithreading = enabled;
+        return this;
+    }
+
+
+    /**
+     * Sets the number of threads to be used for rendering when multithreading is enabled.
+     *
+     * @param count the number of threads to use (should be a positive integer)
+     * @return the current Camera instance to allow method chaining
+     */
+    public Camera setThreadsCount(int count) {
+        this.threadsCount = count;
+        return this;
+    }
 
     /**
      * Print a grid on the image
@@ -98,7 +168,6 @@ public class Camera implements Cloneable {
         imageWriter.writeToImage(fileName); // assuming imageWriter has a method that accepts a file name
         return this;
     }
-
 
     /**
      * Camera getter
@@ -169,17 +238,12 @@ public class Camera implements Cloneable {
         return p0.add(vTo.scale(distance));
     }
 
-
-
     /**
      * Camera builder
      */
     public static class Builder {
         private final Camera camera = new Camera();
-
         private BlackBoard blackBoard;
-
-
 
         /**
          * Sets the ray tracer engine for the camera.
@@ -199,7 +263,6 @@ public class Camera implements Cloneable {
             }
             return this;
         }
-
 
         /**
          * Set the location of the camera
@@ -227,6 +290,7 @@ public class Camera implements Cloneable {
             camera.vUp = vUp.normalize();
             return this;
         }
+
         /**
          * Sets the direction of the camera.
          *
@@ -282,7 +346,6 @@ public class Camera implements Cloneable {
 
         /**
          * Sets the resolution of the image.
-         * Currently, this method does not perform any operations.
          *
          * @param nX the number of pixels in the horizontal direction
          * @param nY the number of pixels in the vertical direction
@@ -306,42 +369,23 @@ public class Camera implements Cloneable {
             return this;
         }
 
+        /**
+         * Enable Adaptive Super Sampling (ASS) for the camera.
+         *
+         * @param maxDepth   maximum recursion depth.
+         *
+         * @param threshold  color difference threshold.
+         *
+         * @return the Builder instance (for method chaining).
+         */
+        public Builder enableAdaptiveAntiAliasing(int maxDepth, double threshold) {
+            camera.adaptiveAntiAliasing = true;   // activate ASS mode
+            camera.maxAdaptiveDepth = maxDepth;   // set maximum recursion depth
+            camera.adaptiveThreshold = threshold; // set threshold for color difference
+            return this;                          // return Builder for fluent chaining
+        }
 
 
-//        /**
-//         * Sets the boolean field  anti-aliasing to be true or false .
-//         *
-//         * @param antiAliasing the boolean value- true or false.
-//         * @return the builder instance.
-//         */
-//        public Builder setAntiAliasing(boolean antiAliasing) {
-//            camera.antiAliasing = antiAliasing;
-//            return this;
-//        }
-
-//        /**
-//         * Sets the number of rays for anti-aliasing.
-//         *
-//         * @param numberOfRays the number of rays to set.
-//         * @return the builder instance.
-//         * @throws IllegalArgumentException if the number of rays is negative or zero.
-//         */
-//        public Builder setAntiAliasingNumberOfRays(int numberOfRays) {
-//            camera.ANTI_ALIASING_NUMBER_OF_RAYS = numberOfRays;
-//            return this;
-//        }
-//        /**
-//         * Sets the number of points in the aperture of the camera.
-//         *
-//         * @param numberOfPoints the number of points to set.
-//         * @return the builder instance.
-//         * @throws IllegalArgumentException if the number of points is negative or zero.
-//         */
-//        public Builder setApertureNumberOfPoints(int numberOfPoints ) {
-//            camera.APERTURE_NUMBER_OF_POINTS=numberOfPoints;
-//            return this;
-//
-//        }
 
         /**
          * Build the camera
@@ -380,7 +424,6 @@ public class Camera implements Cloneable {
                     !Util.isZero(camera.vRight.dotProduct(camera.vUp)))
                 throw new IllegalArgumentException("vTo, vUp and vRight must be orthogonal");
 
-            // Instead of =1, "Util.isZero(length - 1)" ensures the value is sufficiently close to 1
             if (!Util.isZero(camera.vTo.length() - 1) ||
                     !Util.isZero(camera.vUp.length() - 1) ||
                     !Util.isZero(camera.vRight.length() - 1)) {
@@ -401,12 +444,7 @@ public class Camera implements Cloneable {
                 return null;
             }
         }
-
-
-
     }
-
-
 
     /**
      * Camera constructor
@@ -423,15 +461,6 @@ public class Camera implements Cloneable {
         return new Builder();
     }
 
-    /**
-     * construct a ray through a pixel
-     *
-     * @param nX the number of pixels in the x direction
-     * @param nY the number of pixels in the y direction
-     * @param j  the x index of the pixel
-     * @param i  the y index of the pixel
-     * @return the ray that passes through the pixel
-     */
     /**
      * Constructs a single ray from the camera origin through the center of a pixel.
      *
@@ -459,6 +488,28 @@ public class Camera implements Cloneable {
         return new Ray(p0, pIJ.subtract(p0));
     }
 
+
+//HELP
+    /**
+     * Constructs a ray through a specific offset inside the pixel (used for ASS).
+     *
+     * @param xShift horizontal offset inside the pixel
+     * @param yShift vertical offset inside the pixel
+     * @return ray from the camera through the given offset
+     */
+    private Ray constructRayThroughPoint(double xShift, double yShift) {
+        Point pIJ = p0.add(vTo.scale(distance));
+        if (!Util.isZero(xShift)) {
+            pIJ = pIJ.add(vRight.scale(xShift));
+        }
+        if (!Util.isZero(yShift)) {
+            pIJ = pIJ.add(vUp.scale(yShift));
+        }
+        return new Ray(p0, pIJ.subtract(p0).normalize());
+    }
+
+
+
     /**
      * Constructs multiple rays through a pixel for anti-aliasing.
      *
@@ -479,45 +530,67 @@ public class Camera implements Cloneable {
     }
 
 
-//    private Color calcAveragePixelColor(int nX, int nY, int j, int i) {
-//        double pixelWidth = width / nX;
-//        double pixelHeight = height / nY;
-//
-//        Point pCenter = p0.add(vTo.scale(distance));
-//        double xJ = (j - (nX - 1) / 2.0) * pixelWidth;
-//        double yI = -(i - (nY - 1) / 2.0) * pixelHeight;
-//
-//        if (!Util.isZero(xJ)) pCenter = pCenter.add(vRight.scale(xJ));
-//        if (!Util.isZero(yI)) pCenter = pCenter.add(vUp.scale(yI));
-//
-//        List<Ray> rays = generateRayGrid(pCenter, pixelWidth, pixelHeight, ANTI_ALIASING_NUMBER_OF_RAYS);
-//
-//        Color color = Color.BLACK;
-//        for (Ray ray : rays) {
-//            color = color.add(rayTracer.traceRay(ray));
-//        }
-//        return color.reduce(rays.size());
-//    }
 
-//    private List<Ray> generateRayGrid(Point center, double pixelWidth, double pixelHeight, int numRaysPerDim) {
-//        List<Ray> rays = new LinkedList<>();
-//        double subPixelWidth = pixelWidth / numRaysPerDim;
-//        double subPixelHeight = pixelHeight / numRaysPerDim;
-//
-//        for (int i = 0; i < numRaysPerDim; i++) {
-//            for (int j = 0; j < numRaysPerDim; j++) {
-//                double xOffset = (j + 0.5 - numRaysPerDim / 2.0) * subPixelWidth;
-//                double yOffset = -(i + 0.5 - numRaysPerDim / 2.0) * subPixelHeight;
-//
-//                Point p = center;
-//                if (!Util.isZero(xOffset)) p = p.add(vRight.scale(xOffset));
-//                if (!Util.isZero(yOffset)) p = p.add(vUp.scale(yOffset));
-//
-//                rays.add(new Ray(p0, p.subtract(p0)));
-//            }
-//        }
-//        return rays;
-//    }
+    //RECORSYA
+    /**
+     * Adaptive Super Sampling recursive function.
+     */
+    private Color adaptiveAntiAliasing(int nX, int nY, int j, int i,
+                                       int depth, double pixelWidth, double pixelHeight,
+                                       double centerX, double centerY) {
+        if (depth == 0 || pixelWidth < MIN_PIXEL_SIZE || pixelHeight < MIN_PIXEL_SIZE) {
+            Ray ray = constructRayThroughPoint(centerX, centerY);
+            return rayTracer.traceRay(ray);
+        }
 
+        double halfWidth = pixelWidth / 2;
+        double halfHeight = pixelHeight / 2;
+
+        // 4 פינות
+        double[][] offsets = {
+                {-halfWidth, -halfHeight},
+                { halfWidth, -halfHeight},
+                {-halfWidth,  halfHeight},
+                { halfWidth,  halfHeight}
+        };
+
+        Color[] colors = new Color[4];
+        for (int k = 0; k < 4; k++) {
+            double x = centerX + offsets[k][0];
+            double y = centerY + offsets[k][1];
+            Ray ray = constructRayThroughPoint(x, y);
+            colors[k] = rayTracer.traceRay(ray);
+        }
+
+        boolean needSplit = false;
+        for (int m = 0; m < 4 && !needSplit; m++) {
+            for (int n = m + 1; n < 4; n++) {
+                if (colors[m].difference(colors[n]) > adaptiveThreshold) {
+                    needSplit = true;
+                    break;
+                }
+            }
+        }
+
+        if (!needSplit) {
+            return colors[0].add(colors[1]).add(colors[2]).add(colors[3]).scale(0.25);
+        } else {
+            Color totalColor = Color.BLACK;
+            double[][] quarterOffsets = {
+                    {-halfWidth / 2, -halfHeight / 2},
+                    { halfWidth / 2, -halfHeight / 2},
+                    {-halfWidth / 2,  halfHeight / 2},
+                    { halfWidth / 2,  halfHeight / 2}
+            };
+            for (int k = 0; k < 4; k++) {
+                double x = centerX + quarterOffsets[k][0];
+                double y = centerY + quarterOffsets[k][1];
+                totalColor = totalColor.add(
+                        adaptiveAntiAliasing(nX, nY, j, i, depth - 1,
+                                halfWidth, halfHeight, x, y));
+            }
+            return totalColor.scale(0.25);
+        }
+    }
 
 }
